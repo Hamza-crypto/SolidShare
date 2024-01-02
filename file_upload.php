@@ -25,7 +25,7 @@ function handle_uploaded_file($file, $post_id) {
     if (!file_exists($target_dir)) {
         wp_mkdir_p($target_dir);
     }
-
+//
     $file_name = wp_unique_filename($target_dir, $file['name']);
     $target_path = $target_dir . $file_name;
 
