@@ -7,6 +7,7 @@ function create_post_or_page($data)
     $content = sanitize_text_field($data['content']);
     $type = isset($data['post_type']) ? sanitize_text_field($data['post_type']) : 'post'; // Set default to 'page' if not provided
     $meta = isset($data['meta']) ? $data['meta'] : array();
+    $template = isset($data['page_template']) ? sanitize_text_field($data['page_template']) : 'viewer.php'; // Set default to an empty string if not provided
 
     $token_validation_result = validate_bearer_token();
 
@@ -21,6 +22,11 @@ function create_post_or_page($data)
         'post_status'  => 'publish',
     );
 
+     // Add page template to the post data if it's provided
+    if ($type === 'page' && !empty($template)) {
+        $post_data['page_template'] = $template;
+    }
+
     $post_id = wp_insert_post($post_data, true);
 
     if (!is_wp_error($post_id)) {
@@ -29,8 +35,14 @@ function create_post_or_page($data)
             update_post_meta($post_id, $key, $value);
         }
 
-        return new WP_REST_Response(array( $type . '_id' => $post_id), 200);
+        $data = [
+            $type . '_id' => $post_id,
+        ];
+        return new WP_REST_Response($data, 200);
     } else {
-        return new WP_Error('post_creation_failed', __('Post creation failed.'), array('status' => 500));
+        $error_message = $post_id->get_error_message();
+        // Log or output the error message for debugging
+        error_log('Post Creation Error: ' . $error_message);
+        return new WP_Error('post_creation_failed', __($error_message), array('status' => 500));
     }
 }
