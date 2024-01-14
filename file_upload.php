@@ -1,6 +1,6 @@
 <?php
 
-function handle_file_upload($data) {
+function solidshare_handle_file_upload($data) {
     $post_id = $data['id'];
 
     if (!empty($_FILES['file'])) {

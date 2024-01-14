@@ -1,7 +1,7 @@
 <?php
 
 // Function to create a post or page.
-function create_post_or_page($data)
+function solidshare_post_or_page($data)
 {
     $title = sanitize_text_field($data['title']);
     $content = sanitize_text_field($data['content']);

@@ -1,9 +1,29 @@
 <?php
 
 function register_solidshare_custom_endpoint() {
-    register_rest_route('custom/v1', '/authenticate/', array(
+    register_rest_route('solidshare/v1', '/register/', array(
         'methods' => 'POST',
-        'callback' => 'custom_authenticate_user',
+        'callback' => 'solidshare_register_user',
+        'permission_callback' => function() { return ''; },
+        'args' => array(
+            'email' => array(
+                'required' => true,
+                'validate_callback' => function ($param, $request, $key) {
+                    return is_string($param);
+                },
+            ),
+            'password' => array(
+                'required' => true,
+                'validate_callback' => function ($param, $request, $key) {
+                    return is_string($param);
+                },
+            ),
+        ),
+    ));
+    
+    register_rest_route('solidshare/v1', '/authenticate/', array(
+        'methods' => 'POST',
+        'callback' => 'solidshare_authenticate_user',
         'permission_callback' => function() { return ''; },
         'args' => array(
             'email' => array(
@@ -21,9 +41,9 @@ function register_solidshare_custom_endpoint() {
         ),
     ));
 
-    register_rest_route('custom/v1', '/create-post/', array(
+    register_rest_route('solidshare/v1', '/create-post/', array(
         'methods' => 'POST',
-        'callback' => 'create_post_or_page',
+        'callback' => 'solidshare_post_or_page',
         'permission_callback' => function() { return ''; },
         'args' => array(
             'title' => array(
@@ -45,9 +65,9 @@ function register_solidshare_custom_endpoint() {
         ),
     ));
 
-    register_rest_route('custom/v1', '/file-upload/', array(
+    register_rest_route('solidshare/v1', '/file-upload/', array(
         'methods' => 'POST',
-        'callback' => 'handle_file_upload',
+        'callback' => 'solidshare_handle_file_upload',
         'permission_callback' => function() { return ''; },
         'args' => array(
             'id' => array(
@@ -59,4 +79,4 @@ function register_solidshare_custom_endpoint() {
         ),
     ));
 }
-add_action('rest_api_init', 'register_solidshare_custom_endpoint');
+add_action('rest_api_init', 'register_solidshare_endpoint');

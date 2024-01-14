@@ -22,4 +22,4 @@ require "create_post.php";
 
 require "file_upload.php";
 
-?>
+include_once __DIR__ . "/disable_right_click/disable-right-click-for-wp.php";

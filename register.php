@@ -1,7 +1,6 @@
 <?php
 
-// Function to handle authentication and generate an Application Password.
-function solidshare_authenticate_user($data)
+function solidshare_register_user($data)
 {
     $email = sanitize_text_field($data['email']);
     $password = sanitize_text_field($data['password']);
