@@ -2,44 +2,72 @@
 
 function solidshare_register_user($data)
 {
-    $email = sanitize_text_field($data['email']);
-    $password = sanitize_text_field($data['password']);
+    $email = sanitize_email($data['email']);
+    $password = $data['password'];
 
-    $user = wp_authenticate($email, $password);
+    // Your logic to create a user account here
+    $user_id = wp_create_user($email, $password, $email);
 
-    if (!is_wp_error($user) && $user->ID > 0) {
-        $user_id = $user->ID;
-        $app_name = "SOLID_SHARE_DESKTOP_CLIENT";
+    if (!is_wp_error($user_id)) {
+        // Generate a verification token and save it
+        $verification_token = md5(uniqid());
+        update_user_meta($user_id, 'verification_token', $verification_token);
 
-        WP_Application_Passwords::delete_all_application_passwords($user_id);
-        $app_password = WP_Application_Passwords::create_new_application_password($user_id, array( 'name' => $app_name ));
+        // Send verification email
+        $verification_link = site_url("/verify-account/?token=$verification_token&email=$email");
+        $subject = 'Verify Your Account';
 
-        return new WP_REST_Response(array('app_password' => $app_password[0]), 200);
+        // Load the email template content
+        $template_path = get_stylesheet_directory() . '/email-templates/verification-email-template.html';
+        $message = file_get_contents($template_path);
 
+        // Replace placeholders in the template
+        $message = str_replace('%verification_link%', $verification_link, $message);
+
+        $site_logo_id = get_theme_mod('custom_logo'); // Assuming 'custom_logo' is the setting ID
+        $logo = wp_get_attachment_image_src($site_logo_id, 'full');
+
+        if (has_custom_logo()) {
+            $logo =  esc_url($logo[0]);
+        } else {
+            $logo = '<h1>' . get_bloginfo('name') . '</h1>';
+        }
+
+        $message = str_replace('%YOUR_LOGO%', $logo, $message);
+
+        // Set the content type to HTML
+        $headers = array('Content-Type: text/html; charset=UTF-8');
+
+        wp_mail($email, $subject, $message, $headers);
+
+        return array('status' => 'success', 'message' => 'User registered successfully. Please check your email for verification.');
     } else {
-        // Authentication failed.
-        return new WP_Error('authentication_failed', __('Authentication failed. Invalid email or password.'), array('status' => 401));
+        return array('status' => 'error', 'message' => $user_id->get_error_message());
     }
 }
 
-function validate_bearer_token() {
-    $headers = getallheaders();
 
-    if (isset($headers['Authorization'])) {
-        $token_parts = explode(' ', $headers['Authorization']);
+function solidshare_verify_account()
+{
+    if (isset($_GET['token']) && isset($_GET['email'])) {
+        $token = isset($_GET['token']) ? sanitize_text_field($_GET['token']) : '';
+        $email = isset($_GET['email']) ? sanitize_email($_GET['email']) : '';
 
-        if (count($token_parts) !== 2 || $token_parts[0] !== 'Basic') {
-            return new WP_Error('invalid_token', __('Invalid Bearer token.'), array('status' => 401));
+        // Your logic to verify the token and activate the account
+        $saved_token = get_user_meta(get_user_by('email', $email)->ID, 'verification_token', true);
+
+        if ($saved_token === $token) {
+            // Activate user account
+            $user_id = get_user_by('email', $email)->ID;
+            
+            update_user_meta($user_id, 'is_verified', '1');
+            delete_user_meta($user_id, 'verification_token');
+
+            // Redirect the user to a success page
+            wp_redirect(home_url());
+            exit;
         }
-
-        $token = base64_decode($token_parts[1]);
-        list($username, $password) = explode(':', $token);
-        $user = wp_authenticate($username, $password);
-
-        if (is_wp_error($user)) {
-            return new WP_Error('invalid_token', __('Invalid Bearer token.'), array('status' => 401));
-        }
-    } else {
-        return new WP_Error('token_missing', __('Bearer token is missing.'), array('status' => 401));
     }
+
 }
+add_action('init', 'solidshare_verify_account');

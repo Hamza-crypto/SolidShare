@@ -7,7 +7,7 @@ function solidshare_post_or_page($data)
     $content = sanitize_text_field($data['content']);
     $type = isset($data['post_type']) ? sanitize_text_field($data['post_type']) : 'post'; // Set default to 'page' if not provided
     $meta = isset($data['meta']) ? $data['meta'] : array();
-    $template = isset($data['page_template']) ? sanitize_text_field($data['page_template']) : 'viewer.php'; // Set default to an empty string if not provided
+    $template = isset($data['page_template']) ? sanitize_text_field($data['page_template']) : 'template-parts/viewer.php'; 
 
     $token_validation_result = validate_bearer_token();
 

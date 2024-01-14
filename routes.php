@@ -1,6 +1,6 @@
 <?php
 
-function register_solidshare_custom_endpoint() {
+function register_solidshare_endpoints() {
     register_rest_route('solidshare/v1', '/register/', array(
         'methods' => 'POST',
         'callback' => 'solidshare_register_user',
@@ -44,7 +44,7 @@ function register_solidshare_custom_endpoint() {
     register_rest_route('solidshare/v1', '/create-post/', array(
         'methods' => 'POST',
         'callback' => 'solidshare_post_or_page',
-        'permission_callback' => function() { return ''; },
+        'permission_callback' => 'verify_user_verification_status',
         'args' => array(
             'title' => array(
                 'required' => true,
@@ -68,7 +68,7 @@ function register_solidshare_custom_endpoint() {
     register_rest_route('solidshare/v1', '/file-upload/', array(
         'methods' => 'POST',
         'callback' => 'solidshare_handle_file_upload',
-        'permission_callback' => function() { return ''; },
+       'permission_callback' => 'verify_user_verification_status',
         'args' => array(
             'id' => array(
                 'required' => true,
@@ -79,4 +79,4 @@ function register_solidshare_custom_endpoint() {
         ),
     ));
 }
-add_action('rest_api_init', 'register_solidshare_endpoint');
+add_action('rest_api_init', 'register_solidshare_endpoints');

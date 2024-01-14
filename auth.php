@@ -44,3 +44,12 @@ function validate_bearer_token() {
         return new WP_Error('token_missing', __('Bearer token is missing.'), array('status' => 401));
     }
 }
+
+function verify_user_verification_status() {
+    $user_id = get_current_user_id();
+
+    // Check the user's verification status (adjust meta key as needed)
+    $is_verified = get_user_meta($user_id, 'is_verified', true);
+
+    return $is_verified === '1';
+}
