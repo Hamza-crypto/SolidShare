@@ -15,11 +15,19 @@ function solidshare_authenticate_user($data)
         WP_Application_Passwords::delete_all_application_passwords($user_id);
         $app_password = WP_Application_Passwords::create_new_application_password($user_id, array( 'name' => $app_name ));
 
-        return new WP_REST_Response(array('app_password' => $app_password[0]), 200);
+        $data = [
+            'status' => 'success',
+            'message' => 'Welcome! You have successfully logged in.',
+            'token' => $app_password[0]
+        ];
+        return new WP_REST_Response($data, 200);
 
     } else {
-        // Authentication failed.
-        return new WP_Error('authentication_failed', __('Authentication failed. Invalid email or password.'), array('status' => 401));
+        $data = [
+            'status' => 'error',
+            'message' => 'Authentication failed. Invalid email or password.',
+        ];
+        return new WP_REST_Response($data, 200);
     }
 }
 

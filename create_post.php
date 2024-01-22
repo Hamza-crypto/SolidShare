@@ -36,8 +36,11 @@ function solidshare_post_or_page($data)
         }
 
         $data = [
-            $type . '_id' => $post_id,
+            'status' => 'success',
+            'message' => sprintf("%s created successfully", $type),
+            'post_id' => $post_id
         ];
+        
         return new WP_REST_Response($data, 200);
     } else {
         $error_message = $post_id->get_error_message();
