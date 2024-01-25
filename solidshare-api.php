@@ -23,3 +23,5 @@ require "auth.php";
 require "create_post.php";
 
 require "file_upload.php";
+
+require "delete_old_attachments.php";
